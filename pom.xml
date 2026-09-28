@@ -97,5 +97,6 @@
     <module>registry</module>
     <module>springconfigserver</module>
     <module>admin-service</module>
+    <module>Security</module>
   </modules>
 </project>
