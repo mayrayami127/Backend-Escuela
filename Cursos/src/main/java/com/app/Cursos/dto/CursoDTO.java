@@ -1,9 +1,6 @@
 package com.app.Cursos.dto;
 
-/**
- * DTO: es lo único que viaja entre el cliente y el controller.
- * La entidad JPA queda adentro del microservicio (capa service / repository).
- */
+
 public class CursoDTO {
 
     private int id;
