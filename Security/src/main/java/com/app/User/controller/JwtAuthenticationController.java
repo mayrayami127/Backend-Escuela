@@ -14,16 +14,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.User.confing.JwtTokenUtil;
+import com.app.User.dto.UserDto;
+import com.app.User.entity.User;
+import com.app.User.service.UserService;
+
+import jakarta.validation.Valid;
 import model.JwtRequest;
 import model.JwtResponse;
-
 @RestController
-@CrossOrigin
+@RequestMapping("/auth")
 public class JwtAuthenticationController {
 
 	@Autowired
@@ -33,15 +40,14 @@ public class JwtAuthenticationController {
 	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
-	@Qualifier("jwtUserDetailsService")
-	private UserDetailsService jwtInMemoryUserDetailsService;
+	private UserDetailsService userDetailsService;
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest)
 			throws Exception {
 
 		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
-		final UserDetails userDetails = jwtInMemoryUserDetailsService
+		final UserDetails userDetails = userDetailsService
 				.loadUserByUsername(authenticationRequest.getUsername());
 
 		final String token = jwtTokenUtil.generateToken(userDetails);
@@ -64,4 +70,21 @@ public class JwtAuthenticationController {
 			throw new Exception("INVALID_CREDENTIALS", e);
 		}
 	}
+
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/registrar")
+    public ResponseEntity<String> registrar(@Valid @RequestBody UserDto dto) {
+        return userService.registrarUsuario(User.getUser(dto))
+            ? ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado")
+            : ResponseEntity.status(HttpStatus.CONFLICT).body("El email ya existe");
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<Void> validate(@RequestParam String token) {
+        return jwtTokenUtil.isTokenValid(token)
+            ? ResponseEntity.ok().build()
+            : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 }

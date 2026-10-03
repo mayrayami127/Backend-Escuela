@@ -2,10 +2,14 @@ package com.app.User.dto;
 
 import java.io.Serializable;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class UserDto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	@Email 
+	@NotBlank
 	private String email;
 	private String password;
 	private String firstName;

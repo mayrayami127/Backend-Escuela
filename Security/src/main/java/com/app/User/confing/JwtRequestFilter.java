@@ -6,12 +6,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.app.User.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,7 +21,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private JwtUserDetailsService jwtUserDetailsService;
+	private UserDetailsService userDetailsService;   // antes: JwtUserDetailsService
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -53,8 +52,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		// Validar el token una vez obtenido
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-			UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 			// Si el token es válido, se configura Spring Security para establecer la autenticación
 			if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
@@ -67,5 +65,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			}
 		}
 		chain.doFilter(request, response);
+	}
+
+	public UserDetailsService getUserDetailsService() {
+		return userDetailsService;
+	}
+
+	public void setUserDetailsService(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
 	}
 }

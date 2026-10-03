@@ -13,8 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Component
@@ -25,12 +27,11 @@ public class JwtTokenUtil implements Serializable {
 	// Duración del token: 5 horas
 	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
 
-	@Value("${jwt.secret:claveSecretaSuperSeguraParaEscuelaSystem2024}")
+	@Value("${jwt.secret}")
 	private String secret;
 
 	private Key getSigningKey() {
-		byte[] keyBytes = this.secret.getBytes(StandardCharsets.UTF_8);
-		return Keys.hmacShaKeyFor(keyBytes);
+	    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));   // io.jsonwebtoken.io.Decoders
 	}
 
 	public String getUsernameFromToken(String token) {
@@ -81,5 +82,12 @@ public class JwtTokenUtil implements Serializable {
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String username = getUsernameFromToken(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	}
+	public boolean isTokenValid(String token) {
+	    try {
+	        return !isTokenExpired(token);   // el parseo ya verifica la firma
+	    } catch (JwtException | IllegalArgumentException e) {
+	        return false;
+	    }
 	}
 }

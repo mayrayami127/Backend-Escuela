@@ -26,8 +26,7 @@ public class WebSecurityConfig {
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 	@Autowired
-	@Qualifier("jwtUserDetailsService")
-	private UserDetailsService jwtUserDetailsService;
+	private UserDetailsService userDetailsService;  
 
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
@@ -38,11 +37,11 @@ public class WebSecurityConfig {
 	}
 
 	@Bean
-	public DaoAuthenticationProvider authenticationProvider(@Qualifier("jwtUserDetailsService") UserDetailsService userDetailsService) {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(userDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
-		return authProvider;
+	public DaoAuthenticationProvider authenticationProvider() {
+	    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+	    authProvider.setUserDetailsService(userDetailsService);
+	    authProvider.setPasswordEncoder(passwordEncoder());
+	    return authProvider;
 	}
 
 	@Bean
@@ -55,8 +54,7 @@ public class WebSecurityConfig {
 		http
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/authenticate", "/registrar", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-				.anyRequest().authenticated()
+					.requestMatchers("/auth/**", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 			)
 			.exceptionHandling(ex -> ex
 				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -65,9 +63,17 @@ public class WebSecurityConfig {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			);
 
-		http.authenticationProvider(authenticationProvider(jwtUserDetailsService));
+		http.authenticationProvider(authenticationProvider());
 		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
+	}
+
+	public UserDetailsService getUserDetailsService() {
+		return userDetailsService;
+	}
+
+	public void setUserDetailsService(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
 	}
 }
