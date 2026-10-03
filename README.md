@@ -20,20 +20,3 @@ Spring Cloud Config Server para la configuración centralizada.
 Los microservicios se registran en Eureka Server :8761.
 
 El Config Server :8888 proporciona la configuración centralizada.
-
-## Docker
-
-El proyecto incluye Dockerfiles para los microservicios y un
-docker-compose.yml para ejecutar la arquitectura completa.
-
-Para construir y levantar todos los servicios:
-
-docker compose up -d --build
-
-Para comprobar los contenedores:
-
-docker ps
-
-Para detenerlos:
-
-docker compose down
