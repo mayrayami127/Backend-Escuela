@@ -2,12 +2,14 @@ package com.app.Administracion.service;
 
 import java.util.List;
 
-import com.app.Administracion.entity.Administracion;
+import com.app.Administracion.dto.AdministracionDTO;
 
 public interface AdministracionService {
 
-	public List<Administracion> listar();
+    List<AdministracionDTO> listar();
 
-	void agregar(Administracion administracion);
+    void agregar(AdministracionDTO administracion);
 
+    // true si existía y se eliminó; false si no existe ese id
+    boolean eliminar(int id);
 }

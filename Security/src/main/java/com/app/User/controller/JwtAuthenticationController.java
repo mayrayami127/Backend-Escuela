@@ -3,7 +3,6 @@ package com.app.User.controller;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,6 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.User.confing.JwtTokenUtil;
 import com.app.User.dto.UserDto;
-import com.app.User.entity.User;
 import com.app.User.service.UserService;
 
 import jakarta.validation.Valid;
@@ -76,7 +73,7 @@ public class JwtAuthenticationController {
 
     @PostMapping("/registrar")
     public ResponseEntity<String> registrar(@Valid @RequestBody UserDto dto) {
-        return userService.registrarUsuario(User.getUser(dto))
+        return userService.registrarUsuario(dto)
             ? ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado")
             : ResponseEntity.status(HttpStatus.CONFLICT).body("El email ya existe");
     }

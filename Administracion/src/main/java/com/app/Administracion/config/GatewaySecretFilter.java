@@ -11,6 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Solo acepta pedidos que vengan del gateway (header X-Gateway-Secret).
+ * La documentación (Swagger) queda abierta para poder verla; los endpoints del CRUD siguen protegidos.
+ */
 @Component
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
@@ -20,7 +24,10 @@ public class GatewaySecretFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String p = request.getRequestURI();
-        return p.startsWith("/h2-console") || p.startsWith("/actuator");
+        return p.startsWith("/h2-console")
+                || p.startsWith("/actuator")
+                || p.startsWith("/swagger-ui")
+                || p.startsWith("/v3/api-docs");
     }
 
     @Override

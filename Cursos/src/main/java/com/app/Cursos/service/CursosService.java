@@ -2,13 +2,14 @@ package com.app.Cursos.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
-import com.app.Cursos.entity.Cursos;
+import com.app.Cursos.dto.CursoDTO;
 
 public interface CursosService {
 
-public List<Cursos> listar();
-    
-    public void agregar(Cursos cursos);
+    List<CursoDTO> listar();
+
+    void agregar(CursoDTO curso);
+
+    // true si existía y se eliminó; false si no existe ese id
+    boolean eliminar(int id);
 }
