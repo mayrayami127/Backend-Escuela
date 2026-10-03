@@ -18,3 +18,18 @@ target/
 # Sistema
 .DS_Store
 Thumbs.db
+
+target/
+
+.idea/
+
+.vscode/
+
+*.iml
+
+*.log
+
+.env
+
+HELP.md
+
