@@ -1,13 +1,18 @@
 server:
   port: 8085
 
+jwt:
+  secret: ZXNjdWVsYS1qd3Qtc2VjcmV0LWtleS1wYXJhLWRldi0zMmJ5dGVzIQ==
+
 spring:
   application:
     name: ms-security
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:securitydb;DB_CLOSE_DELAY=-1
     driverClassName: org.h2.Driver
     username: sa
     password:
@@ -15,4 +20,35 @@ spring:
     console:
       enabled: true
   jpa:
+    hibernate:
+      ddl-auto: update
     database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  h2:
+    console:
+      enabled: false

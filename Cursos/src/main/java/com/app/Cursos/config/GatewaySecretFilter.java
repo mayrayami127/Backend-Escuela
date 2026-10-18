@@ -11,14 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Solo acepta pedidos que vengan del gateway (header X-Gateway-Secret).
- * La documentación (Swagger) queda abierta para poder verla; los endpoints del CRUD siguen protegidos.
- */
 @Component
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
-    @Value("${gateway.internal-secret}")
+    @Value("${gateway.internal-secret:escuela-gateway-secret}")
     private String secret;
 
     @Override

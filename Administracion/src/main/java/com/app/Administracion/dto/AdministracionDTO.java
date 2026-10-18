@@ -1,20 +1,20 @@
 package com.app.Administracion.dto;
 
-
 public class AdministracionDTO {
 
-    private int id;
+    private Long id;
     private String nombre;
     private String apellido;
     private String dni;
     private String email;
     private String especialidad;
+    private String tipoPersonal;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -56,5 +56,13 @@ public class AdministracionDTO {
 
     public void setEspecialidad(String especialidad) {
         this.especialidad = especialidad;
+    }
+
+    public String getTipoPersonal() {
+        return tipoPersonal;
+    }
+
+    public void setTipoPersonal(String tipoPersonal) {
+        this.tipoPersonal = tipoPersonal;
     }
 }

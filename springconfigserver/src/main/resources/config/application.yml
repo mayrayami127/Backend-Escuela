@@ -1,0 +1,5 @@
+gateway:
+  internal-secret: escuela-gateway-secret
+
+jwt:
+  secret: ZXNjdWVsYS1qd3Qtc2VjcmV0LWtleS1wYXJhLWRldi0zMmJ5dGVzIQ==

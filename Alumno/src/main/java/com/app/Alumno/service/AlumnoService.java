@@ -8,8 +8,7 @@ public interface AlumnoService {
 
     List<AlumnoDTO> listar();
 
-    void agregar(AlumnoDTO alumno);
+    AlumnoDTO guardar(AlumnoDTO alumno);
 
-    // true si existía y se eliminó; false si no existe ese id
-    boolean eliminar(int id);
+    AlumnoDTO cambiarEstado(Long id, String estado);
 }

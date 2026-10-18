@@ -8,8 +8,9 @@ public interface CursosService {
 
     List<CursoDTO> listar();
 
-    void agregar(CursoDTO curso);
+    List<CursoDTO> listarParaUsuario(String email, boolean soloAsignados);
 
-    // true si existía y se eliminó; false si no existe ese id
-    boolean eliminar(int id);
+    CursoDTO guardar(CursoDTO curso);
+
+    boolean eliminar(Long id);
 }

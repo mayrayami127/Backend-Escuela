@@ -1,0 +1,136 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-escuela
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - escuela-network
+
+  eurekaserver:
+    build:
+      context: ./registry
+    container_name: eurekaserver
+    ports:
+      - "8761:8761"
+    networks:
+      - escuela-network
+
+  configserver:
+    build:
+      context: ./springconfigserver
+    container_name: configserver
+    ports:
+      - "8888:8888"
+    networks:
+      - escuela-network
+    depends_on:
+      - eurekaserver
+
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: admin-service
+    ports:
+      - "9090:9090"
+    networks:
+      - escuela-network
+    depends_on:
+      - eurekaserver
+      - configserver
+
+  ms-security:
+    build:
+      context: ./Security
+      dockerfile: Dockerfile
+    container_name: ms-security
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+    depends_on:
+      - eurekaserver
+      - rabbitmq
+    ports:
+      - "8085:8085"
+    networks:
+      - escuela-network
+
+  ms-cursos:
+    build:
+      context: ./Cursos
+      dockerfile: Dockerfile
+    container_name: ms-cursos
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+    depends_on:
+      - eurekaserver
+      - rabbitmq
+    ports:
+      - "8081:8081"
+    networks:
+      - escuela-network
+
+  ms-alumnos:
+    build:
+      context: ./Alumno
+      dockerfile: Dockerfile
+    container_name: ms-alumnos
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+    depends_on:
+      - eurekaserver
+      - rabbitmq
+    ports:
+      - "8082:8082"
+    networks:
+      - escuela-network
+
+  ms-administracion:
+    build:
+      context: ./Administracion
+      dockerfile: Dockerfile
+    container_name: ms-administracion
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+    depends_on:
+      - eurekaserver
+      - rabbitmq
+    ports:
+      - "8083:8083"
+    networks:
+      - escuela-network
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: dockerfile
+    container_name: gateway
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+    ports:
+      - "8080:8080"
+    networks:
+      - escuela-network
+    depends_on:
+      - eurekaserver
+      - configserver
+      - ms-security
+      - ms-cursos
+      - ms-alumnos
+      - ms-administracion
+
+networks:
+  escuela-network:
+    driver: bridge

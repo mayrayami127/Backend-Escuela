@@ -1,8 +1,40 @@
 services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-escuela
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: escuela_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - escuela-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-escuela
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - escuela-network
 
   eurekaserver:
     build:
-      context: ./registry
+      context: .
+      dockerfile: registry/Dockerfile
     container_name: eurekaserver
     ports:
       - "8761:8761"
@@ -11,65 +43,110 @@ services:
 
   configserver:
     build:
-      context: ./springconfigserver
+      context: .
+      dockerfile: springconfigserver/dockerfile
     container_name: configserver
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
     ports:
       - "8888:8888"
-    networks:
-      - escuela-network
     depends_on:
       - eurekaserver
-
-  admin-service:
-    build:
-      context: ./admin-service
-      dockerfile: Dockerfile
-    container_name: admin-service
-    ports:
-      - "9090:9090"
     networks:
       - escuela-network
-    depends_on:
-      - eurekaserver
-      - configserver
 
-  ms-cursos:
+  ms-security:
     build:
-      context: ./Cursos
-      dockerfile: Dockerfile
-    container_name: ms-cursos
+      context: .
+      dockerfile: Security/Dockerfile
+    container_name: ms-security
     environment:
-      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/escuela_db?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      CONFIG_SERVER_URL: http://configserver:8888
     depends_on:
-      - eurekaserver
+      mysql-db:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
     ports:
-      - "8081:8081"
+      - "8085:8085"
     networks:
       - escuela-network
 
   ms-alumnos:
     build:
-      context: ./Alumno
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Alumno/Dockerfile
     container_name: ms-alumnos
     environment:
-      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/escuela_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      CONFIG_SERVER_URL: http://configserver:8888
     depends_on:
-      - eurekaserver
+      mysql-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
     ports:
       - "8082:8082"
     networks:
       - escuela-network
 
+  ms-cursos:
+    build:
+      context: .
+      dockerfile: Cursos/Dockerfile
+    container_name: ms-cursos
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/escuela_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      CONFIG_SERVER_URL: http://configserver:8888
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    ports:
+      - "8081:8081"
+    networks:
+      - escuela-network
+
   ms-administracion:
     build:
-      context: ./Administracion
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Administracion/Dockerfile
     container_name: ms-administracion
     environment:
-      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/escuela_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      CONFIG_SERVER_URL: http://configserver:8888
     depends_on:
-      - eurekaserver
+      mysql-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
     ports:
       - "8083:8083"
     networks:
@@ -77,18 +154,38 @@ services:
 
   gateway:
     build:
-      context: ./gateway
+      context: .
+      dockerfile: gateway/dockerfile
     container_name: gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8761/eureka/
+      CONFIG_SERVER_URL: http://configserver:8888
     ports:
       - "8080:8080"
-    networks:
-      - escuela-network
     depends_on:
       - eurekaserver
       - configserver
-      - ms-cursos
+      - ms-security
       - ms-alumnos
+      - ms-cursos
       - ms-administracion
+    networks:
+      - escuela-network
+
+  frontend:
+    build:
+      context: ../Fronted-Escuela
+    container_name: frontend-angular
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway
+    networks:
+      - escuela-network
+
+volumes:
+  mysql_data:
 
 networks:
   escuela-network:

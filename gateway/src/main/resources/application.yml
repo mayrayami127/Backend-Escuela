@@ -1,15 +1,87 @@
 server:
   port: 8080
 
+jwt:
+  secret: ZXNjdWVsYS1qd3Qtc2VjcmV0LWtleS1wYXJhLWRldi0zMmJ5dGVzIQ==
+
+gateway:
+  internal-secret: escuela-gateway-secret
+
 spring:
   application:
     name: gateway
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            exposedHeaders:
+              - Authorization
+      routes:
+        - id: ms-security-public
+          uri: lb://ms-security
+          predicates:
+            - Path=/auth/authenticate,/auth/validate
+        - id: ms-security-protected
+          uri: lb://ms-security
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AuthenticationFilter
+        - id: ms-alumnos
+          uri: lb://ms-alumnos
+          predicates:
+            - Path=/api/alumnos/**
+          filters:
+            - AuthenticationFilter
+        - id: ms-cursos
+          uri: lb://ms-cursos
+          predicates:
+            - Path=/api/cursos/**,/api/notas/**
+          filters:
+            - AuthenticationFilter
+        - id: ms-administracion
+          uri: lb://ms-administracion
+          predicates:
+            - Path=/api/administracion/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Security
+        url: /v3/api-docs/security
+      - name: Alumnos
+        url: /v3/api-docs/alumnos
+      - name: Cursos
+        url: /v3/api-docs/cursos
+      - name: Administracion
+        url: /v3/api-docs/administracion
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

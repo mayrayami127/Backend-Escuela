@@ -8,8 +8,7 @@ public interface AdministracionService {
 
     List<AdministracionDTO> listar();
 
-    void agregar(AdministracionDTO administracion);
+    AdministracionDTO guardar(AdministracionDTO administracion);
 
-    // true si existía y se eliminó; false si no existe ese id
-    boolean eliminar(int id);
+    boolean eliminar(Long id);
 }

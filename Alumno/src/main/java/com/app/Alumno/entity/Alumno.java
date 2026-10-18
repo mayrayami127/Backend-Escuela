@@ -1,67 +1,54 @@
 package com.app.Alumno.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.app.Alumno.Enum.Estado;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name="alumnos")
+@Table(name = "alumnos")
 public class Alumno {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	private String nombre;
-	private String apellido;
-	private String gmail;
-	
-	 @Column(name = "curso_id")
-	    private Long cursoId;
-	
-	public Alumno() {
-		super();
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public int getId() {
-		return id;
-	}
+    @Column(nullable = false)
+    private String nombre;
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    @Column(nullable = false)
+    private String apellido;
 
-	public String getNombre() {
-		return nombre;
-	}
+    @Column(nullable = false, unique = true)
+    private String gmail;
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    @Column(name = "curso_id")
+    private Long cursoId;
 
-	public String getApellido() {
-		return apellido;
-	}
+    // HABILITADO, NOHABILITADO, SIN_ASIGNAR (los alumnos nunca se borran)
+    @Enumerated(EnumType.STRING)
+    private Estado estado = Estado.HABILITADO;
 
-	public void setApellido(String apellido) {
-		this.apellido = apellido;
-	}
+    public Alumno() {
+    }
 
-	public String getGmail() {
-		return gmail;
-	}
+    public Alumno(Long id, String nombre, String apellido, String gmail, Long cursoId, Estado estado) {
+        this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.gmail = gmail;
+        this.cursoId = cursoId;
+        this.estado = estado;
+    }
 
-	public void setGmail(String gmail) {
-		this.gmail = gmail;
-	}
-	public Long getCursoId() {
-		return cursoId;
-	}
-
-	public void setCursoId(Long cursoId) {
-		this.cursoId = cursoId;
-	}
-	
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getApellido() { return apellido; }
+    public void setApellido(String apellido) { this.apellido = apellido; }
+    public String getGmail() { return gmail; }
+    public void setGmail(String gmail) { this.gmail = gmail; }
+    public Long getCursoId() { return cursoId; }
+    public void setCursoId(Long cursoId) { this.cursoId = cursoId; }
+    public Estado getEstado() { return estado; }
+    public void setEstado(Estado estado) { this.estado = estado; }
 }

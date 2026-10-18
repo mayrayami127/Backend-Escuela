@@ -1,19 +1,21 @@
 package com.app.Cursos.dto;
 
-
 public class CursoDTO {
 
-    private int id;
+    private Long id;
     private String materia;
     private String nombreMaestro;
     private int numSalon;
-    private long administracionId;
+    private int cupo;
+    private String horario;
+    private String docenteEmail;
+    private Long administracionId;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -41,11 +43,35 @@ public class CursoDTO {
         this.numSalon = numSalon;
     }
 
-    public long getAdministracionId() {
+    public int getCupo() {
+        return cupo;
+    }
+
+    public void setCupo(int cupo) {
+        this.cupo = cupo;
+    }
+
+    public String getHorario() {
+        return horario;
+    }
+
+    public void setHorario(String horario) {
+        this.horario = horario;
+    }
+
+    public String getDocenteEmail() {
+        return docenteEmail;
+    }
+
+    public void setDocenteEmail(String docenteEmail) {
+        this.docenteEmail = docenteEmail;
+    }
+
+    public Long getAdministracionId() {
         return administracionId;
     }
 
-    public void setAdministracionId(long administracionId) {
+    public void setAdministracionId(Long administracionId) {
         this.administracionId = administracionId;
     }
 }
