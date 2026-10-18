@@ -1,4 +1,4 @@
-# Sistema de Gestión Escolar — Microservicios con Spring Cloud
+Fronted-Escuela# Sistema de Gestión Escolar — Microservicios con Spring Cloud
 
 Aplicación para la gestión de un colegio (alumnos, cursos, notas, personal y usuarios con roles),
 construida con arquitectura de microservicios y un frontend Angular.
