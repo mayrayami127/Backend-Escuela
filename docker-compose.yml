@@ -175,7 +175,7 @@ services:
 
   frontend:
     build:
-      context: ../Fronted-Escuela
+      context: https://github.com/mayrayami127/Fronted-Escuela.git#main
     container_name: frontend-angular
     ports:
       - "4200:80"

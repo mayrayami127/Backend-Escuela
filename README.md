@@ -1,4 +1,4 @@
-Fronted-Escuela# Sistema de Gestión Escolar — Microservicios con Spring Cloud
+# Sistema de Gestión Escolar — Microservicios con Spring Cloud
 
 Aplicación para la gestión de un colegio (alumnos, cursos, notas, personal y usuarios con roles),
 construida con arquitectura de microservicios y un frontend Angular.
@@ -23,7 +23,7 @@ construida con arquitectura de microservicios y un frontend Angular.
 | `Administracion` | 8083 | Personal administrativo |
 | RabbitMQ | 5672 / 15672 | Mensajería asincrónica (15672 = panel web) |
 | MySQL | 3306 | Base de datos en producción |
-| Frontend (repo `fronted-Escuela`) | 4200 | Aplicación Angular |
+| Frontend (repo `Fronted-Escuela`) | 4200 | Aplicación Angular |
 
 Cada microservicio sigue **3 capas** (controller → service → repository), el controller trabaja con **DTO**,
 los errores se manejan con `@RestControllerAdvice` y todos exponen **Swagger** (`/swagger-ui/index.html` en su puerto).
@@ -69,13 +69,13 @@ Root puede crear más usuarios desde la pantalla **Usuarios**.
 
 ## Repositorios
 
-El proyecto está dividido en **dos repositorios independientes** que deben quedar en carpetas hermanas:
+El proyecto está dividido en dos repositorios:
 
-```
-proyecto/
-├── Escuela-main/        backend (este repositorio)
-└── fronted-Escuela/     frontend Angular + Bootstrap
-```
+- Backend (este repositorio): https://github.com/mayrayami127/Backend-Escuela
+- Frontend Angular + Bootstrap: https://github.com/mayrayami127/Fronted-Escuela
+
+Para **ejecutar con Docker alcanza con este repositorio**: el `docker-compose.yml` descarga el frontend desde GitHub al construir la imagen.
+Solo para desarrollo con `ng serve` hace falta clonar también el frontend.
 
 ## Ejecución en desarrollo (H2)
 
@@ -96,7 +96,7 @@ proyecto/
    4. `Alumno`, `Cursos` y `Administracion`
    5. `gateway`
 3. Verificar en http://localhost:8761 que todos estén registrados.
-4. **Frontend**, dentro de `fronted-Escuela`:
+4. **Frontend**, dentro de `Fronted-Escuela`:
 
    ```
    npm install
@@ -108,25 +108,28 @@ proyecto/
 
 ## Ejecución en producción (Docker + MySQL)
 
-Con las dos carpetas hermanas (`Escuela-main` y `fronted-Escuela`) en la máquina donde corre Docker:
+Solo hace falta este repositorio, Docker con Compose v2 e internet en la primera construcción:
 
 ```
-cd Escuela-main
-docker compose -f docker-compose.prod.yml up --build -d
+git clone https://github.com/mayrayami127/Backend-Escuela.git
+cd Backend-Escuela
+docker compose up --build -d
 ```
 
-- Aplicación: `http://<IP-de-Docker>:4200`
-- Gateway (API): `http://<IP-de-Docker>:8080`
-- Eureka: `http://<IP-de-Docker>:8761`
-- RabbitMQ: `http://<IP-de-Docker>:15672` (usuario `guest`, contraseña `guest`)
+- Aplicación: `http://localhost:4200` (si Docker corre en otra máquina: `http://<IP-de-esa-máquina>:4200`)
+- Gateway (API): `http://localhost:8080`
+- Eureka: `http://localhost:8761`
+- RabbitMQ: `http://localhost:15672` (usuario `guest`, contraseña `guest`)
 
 Detalles:
 
-- Cada microservicio y el frontend se compilan dentro de Docker (build multi-stage): no hace falta compilar antes con Maven ni con npm.
+- Cada microservicio y el frontend se compilan dentro de Docker (build multi-stage): no hace falta tener Java, Maven ni Node instalados.
+- El frontend se descarga del repositorio `Fronted-Escuela` (rama `main`) al construir. Ese repositorio tiene que ser público.
 - El contenedor del frontend usa **nginx**: sirve la aplicación en el puerto 80 (publicado como 4200) y reenvía `/api` y `/auth` al gateway por la red interna de Docker.
-- Si ya hay un RabbitMQ levantado a mano (`docker run`), eliminarlo antes: `docker rm -f rabbitmq-escuela`.
-- La primera construcción tarda varios minutos (descarga las dependencias de Maven). Se necesitan unos 6 GB de RAM libres para correr los 7 servicios Java, MySQL y RabbitMQ.
-- Ver el estado: `docker compose -f docker-compose.prod.yml ps`. Detener todo: `docker compose -f docker-compose.prod.yml down`.
+- Los puertos 4200, 8080, 8761 y 15672 tienen que estar libres. Si hay un RabbitMQ levantado a mano (`docker run`), eliminarlo antes: `docker rm -f rabbitmq-escuela`.
+- La primera construcción tarda varios minutos (descarga imágenes y dependencias de Maven; las siguientes usan caché). Se necesitan unos 6 GB de RAM libres.
+- Esperar unos 30-60 segundos después de `up` a que los servicios se registren en Eureka antes de iniciar sesión.
+- Ver el estado: `docker compose ps`. Detener todo: `docker compose down`.
 
 ## Cómo probar RabbitMQ
 
@@ -143,7 +146,7 @@ En http://localhost:15672, pestaña **Queues**, se ven las colas y los mensajes.
 ## Estructura del backend
 
 ```
-Escuela-main/
+Backend-Escuela/
 ├── Administracion/        ms de personal administrativo
 ├── Alumno/                ms de alumnos
 ├── Cursos/                ms de cursos, notas e inscripciones
